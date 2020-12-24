@@ -2,6 +2,9 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
 }
+
+group = 'com.github.behzadian'
+
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
