@@ -8,20 +8,15 @@ import java.lang.Exception
 
 open class FixedAssetTypefaceTextView : androidx.appcompat.widget.AppCompatTextView {
 
-    companion object {
-        private var typeface: Typeface? = null;
-        fun theFont(context: Context, fontPath: String): Typeface {
-            if (typeface == null) {
-                typeface = Typeface.createFromAsset(context.assets, fontPath);
-            }
-            return typeface!!;
-        }
+    private val fixedTypefaceFont: Typeface by lazy {
+        Typeface.createFromAsset(context.assets, typefacePath());
     }
 
+    private var initialized: Boolean = false
     private var attributedFontPath: String? = null
     open val inheritedFontPath: String? = null
 
-    protected fun typefacePath(): String {
+    private fun typefacePath(): String {
         if (inheritedFontPath.isValuable() && attributedFontPath.isValuable())
             throw Exception("Both inheritedFontPath: ($inheritedFontPath) and attributedFontPath: ($attributedFontPath) is provided");
 
@@ -46,19 +41,20 @@ open class FixedAssetTypefaceTextView : androidx.appcompat.widget.AppCompatTextV
 
 
     private fun loadAttrs(attrs: AttributeSet?, defStyleAttr: Int = 0) {
+        initialized = true;
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.FixedAssetTypefaceTextView, defStyleAttr, 0)
         try {
             attributedFontPath = typedArray.getString(R.styleable.FixedAssetTypefaceTextView_assetFilePath)
-                    ?: ""
-            if (attributedFontPath.isValuable())
-                typeface = theFont(context, typefacePath());
+            typeface = fixedTypefaceFont;
         } finally {
             typedArray.recycle();
         }
     }
 
     override fun setTypeface(tf: Typeface?) {
-        if (tf != theFont(context, typefacePath()))
+        if (!initialized)
+            return;
+        if (tf != fixedTypefaceFont)
             return;
         super.setTypeface(tf);
     }
